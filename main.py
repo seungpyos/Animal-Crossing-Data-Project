@@ -7,7 +7,7 @@ import plotly.express as px
 df = pd.read_csv('villagers.csv')
 df.head(20)
 
-
+#hi sexies - phong
 
 df['Name'].count()
 
