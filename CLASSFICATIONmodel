@@ -1,0 +1,83 @@
+# Configure libraries
+
+import pandas as pd
+import numpy as np
+import warnings
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+warnings.filterwarnings('ignore')
+plt.rcParams['figure.figsize'] = (10, 10)
+plt.style.use('seaborn')
+
+
+#Data Visualization
+villagers = pd.read_csv('villagers.csv')
+
+print('Data:')
+print(villagers)
+villagers.head()
+
+
+
+print(villagers.shape)
+print(villagers.groupby('Name').size())
+print(villagers['Gender'].value_counts())
+
+#Converting the non numerical data into numerical values
+def handle_non_numerical_data(villagers):
+    columns = villagers.columns.values
+    for column in columns:
+        text_digit_vals = {}
+        def convert_to_int(val):
+            return text_digit_vals[val]
+
+        if villagers[column].dtype != np.int64 and villagers[column].dtype != np.float64:
+            column_contents = villagers[column].values.tolist()
+            unique_elements = set(column_contents)
+            x = 0
+            for unique in unique_elements:
+                if unique not in text_digit_vals:
+                    text_digit_vals[unique] = x
+                    x+=1
+
+            villagers[column] = list(map(convert_to_int, villagers[column]))
+
+    return villagers
+#Printing out their numerical values
+villagers = handle_non_numerical_data(villagers)
+print(villagers.head())
+
+#Missing Values
+villagers.isnull().sum()
+
+# Separate feature and target variables
+feature = villagers.drop('Gender', axis=1)
+target = villagers['Gender']
+
+# Convert target variable to numeric
+le = LabelEncoder()
+target = le.fit_transform(target)
+
+# Split the dataset into training and validation sets
+X_train, X_test, y_train, y_test = train_test_split(feature, target, shuffle=True, test_size=0.2, random_state=1)
+
+print('Shape of training feature:', X_train.shape)
+print('Shape of validation feature:' , X_test.shape)
+print('Shape of training label:', y_train.shape)
+print('Shape of validation label:', y_test.shape)
+
+
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
+y_pred = dt.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print('Accuracy:' , accuracy)
